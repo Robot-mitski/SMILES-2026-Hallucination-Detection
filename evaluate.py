@@ -5,7 +5,6 @@ Provides helpers used by ``solution.ipynb`` to run the full evaluation loop,
 print a formatted summary table, save results to a JSON file, and generate
 predictions on an unlabelled test set.
 
-For each ``(idx_train, idx_val, idx_test)`` split produced by ``splitting.py``
 the pipeline evaluates four checkpoints:
 
   1. Majority-class baseline  — trivial classifier; sets the accuracy floor.
