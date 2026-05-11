@@ -1,19 +1,3 @@
-"""
-evaluate.py — Evaluation utilities (fixed infrastructure, do not edit).
-
-Provides helpers used by ``solution.ipynb`` to run the full evaluation loop,
-print a formatted summary table, save results to a JSON file, and generate
-predictions on an unlabelled test set.
-
-the pipeline evaluates four checkpoints:
-
-  1. Majority-class baseline  — trivial classifier; sets the accuracy floor.
-  2. HallucinationProbe (train) — probe metrics on the training split.
-  3. HallucinationProbe (val)  — probe metrics on the validation split.
-  4. HallucinationProbe (test) — probe metrics on the held-out test split.
-
-Metrics reported: Accuracy, F1, AUROC (primary ranking metric).
-"""
 
 from __future__ import annotations
 
@@ -24,12 +8,6 @@ import numpy as np
 from sklearn.dummy import DummyClassifier
 from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
 
-
-# ---------------------------------------------------------------------------
-# Internal helpers
-# ---------------------------------------------------------------------------
-
-
 def _fmt(value: float) -> str:
     """Format a ``[0, 1]`` metric value as a percentage string."""
     return f"{value * 100:.2f}%"
@@ -39,12 +17,6 @@ def _nanmean(values: list[float]) -> float:
     """Return the mean of *values*, ignoring NaN entries."""
     valid = [v for v in values if not math.isnan(v)]
     return float(np.mean(valid)) if valid else float("nan")
-
-
-# ---------------------------------------------------------------------------
-# Per-fold evaluation
-# ---------------------------------------------------------------------------
-
 
 def evaluate_fold(
     probe,
@@ -74,7 +46,6 @@ def evaluate_fold(
     """
     probe.fit(X[idx_train], y[idx_train])
 
-    # If the probe supports threshold tuning, tune on the validation split.
     if idx_val is not None and hasattr(probe, "fit_hyperparameters"):
         probe.fit_hyperparameters(X[idx_val], y[idx_val])
 
@@ -99,12 +70,6 @@ def evaluate_fold(
             results[f"{split_name}_auroc"] = float("nan")
 
     return results
-
-
-# ---------------------------------------------------------------------------
-# Full evaluation loop
-# ---------------------------------------------------------------------------
-
 
 def run_evaluation(
     splits: list[tuple[np.ndarray, np.ndarray | None, np.ndarray]],
@@ -144,7 +109,6 @@ def run_evaluation(
         )
         print(f"{'─' * 50}")
 
-        # ── Checkpoint 1: Majority-class baseline ──────────────────────
         dummy = DummyClassifier(strategy="most_frequent")
         dummy.fit(X[idx_train], y[idx_train])
         y_dummy = dummy.predict(X[idx_test])
@@ -152,7 +116,6 @@ def run_evaluation(
         baseline_f1 = f1_score(y[idx_test], y_dummy, zero_division=0)
         print(f"  Baseline  — Acc: {_fmt(baseline_acc)}  F1: {_fmt(baseline_f1)}")
 
-        # ── Checkpoints 2 & 3: Student probe ───────────────────────────
         probe = ProbeClass()
         metrics = evaluate_fold(probe, X, y, idx_train, idx_val, idx_test)
 
@@ -186,12 +149,6 @@ def run_evaluation(
         )
 
     return fold_results
-
-
-# ---------------------------------------------------------------------------
-# Summary and persistence
-# ---------------------------------------------------------------------------
-
 
 def print_summary(
     fold_results: list[dict],
