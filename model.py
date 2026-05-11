@@ -1,15 +1,3 @@
-"""
-model.py — LLM loader (fixed infrastructure, do not edit).
-
-Loads ``Qwen/Qwen2.5-0.5B`` and exposes ``get_model_and_tokenizer``, which
-returns the model and tokenizer ready for inference with hidden-state output
-enabled (``output_hidden_states=True``).
-
-Key constants used by the hidden-state extraction loop in ``solution.ipynb``:
-
-  ``_DEFAULT_MODEL = "Qwen/Qwen2.5-0.5B"``
-  ``MAX_LENGTH = 512``
-"""
 
 from __future__ import annotations
 
